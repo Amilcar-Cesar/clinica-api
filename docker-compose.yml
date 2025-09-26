@@ -1,0 +1,15 @@
+
+services:
+  db:
+    image: mysql:8
+    container_name: clinica-mysql
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - clinica-api:/var/lib/mysql
+
+volumes:
+  clinica-api:
