@@ -21,7 +21,7 @@ MYSQL_DATABASE = os.getenv('MYSQL_DATABASE')
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'troque-em-producao')
-    # Ajuste o driver: mysql+pymysql ou mysql+mysqlconnector conforme seu driver instalado
+    
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'SQLALCHEMY_DATABASE_URI') or f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

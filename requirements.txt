@@ -5,3 +5,4 @@ Werkzeug
 pymysql
 cryptography
 pytest
+python-dotenv
