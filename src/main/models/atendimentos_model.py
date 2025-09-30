@@ -8,10 +8,23 @@ class Atendimentos(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     paciente_nome = db.Column(db.String(120), nullable=False)
     paciente_cpf = db.Column(db.String(14), nullable=True)
+    # optional FK to Pacientes table; when provided we validate existence and
+    # snapshot paciente_nome/paciente_cpf for denormalized read.
+    paciente_id = db.Column(db.Integer, db.ForeignKey(
+        'pacientes.id'), nullable=True)
+
     especialidade = db.Column(db.String(120), nullable=True)
+    # optional FK to Especialidades
+    especialidade_id = db.Column(db.Integer, db.ForeignKey(
+        'especialidades.id'), nullable=True)
     data_hora = db.Column(db.DateTime, nullable=False)
+    # snapshot of username who created the atendimento
     criado_por = db.Column(db.String(80), nullable=False)
-    criado_em = db.Column(db.DateTime, nullable=False,server_default=db.func.now())
+    # FK to Usuarios (id) for stronger relation validation/audit
+    criado_por_id = db.Column(
+        db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    criado_em = db.Column(db.DateTime, nullable=False,
+                          server_default=db.func.now())
 
     def to_dict(self):
         return {
@@ -19,9 +32,9 @@ class Atendimentos(db.Model):
             'paciente_nome': self.paciente_nome,
             'paciente_cpf': self.paciente_cpf,
             'especialidade': self.especialidade,
-            'data_hora': self.data_hora.isoformat() if self.data_hora else None,
+            'data_hora': self.data_hora.strftime("%d-%m-%Y %H:%M:%S") if self.data_hora else None,
             'criado_por': self.criado_por,
-            'criado_em': self.criado_em.isoformat() if self.criado_em else None,
+            'criado_em': self.criado_em.strftime("%d-%m-%Y %H:%M:%S") if self.criado_em else None,
         }
 
     def __repr__(self):
@@ -77,11 +90,40 @@ class Atendimentos(db.Model):
             'data') or data.get('horario')
         criado_por = data.get('criado_por') or data.get(
             'usuario') or data.get('username')
+        paciente_id = data.get('paciente_id')
+        especialidade_id = data.get('especialidade_id')
+        criado_por_id = data.get('criado_por_id')
 
         if not paciente_nome:
             raise ValueError('paciente_nome is required')
-        if not criado_por:
-            raise ValueError('criado_por (username) is required')
+        if not criado_por and not criado_por_id:
+            raise ValueError(
+                'criado_por (username) or criado_por_id is required')
+
+        # Validate foreign keys if provided and populate snapshots
+        if paciente_id is not None:
+            from src.main.models.pacientes_model import Pacientes
+            p = db.session.get(Pacientes, int(paciente_id))
+            if p is None:
+                raise ValueError(f'paciente_id {paciente_id} does not exist')
+            paciente_nome = p.nome
+            paciente_cpf = p.cpf
+
+        if especialidade_id is not None:
+            from src.main.models.especialidades_model import Especialidades
+            e = db.session.get(Especialidades, int(especialidade_id))
+            if e is None:
+                raise ValueError(
+                    f'especialidade_id {especialidade_id} does not exist')
+            especialidade = e.nome_especialidade
+
+        if criado_por_id is not None:
+            from src.main.models.usuarios_model import Usuarios
+            u = db.session.get(Usuarios, int(criado_por_id))
+            if u is None:
+                raise ValueError(
+                    f'criado_por_id {criado_por_id} does not exist')
+            criado_por = u.usuario
 
         if data_hora_raw:
             data_hora = cls._parse_datetime(data_hora_raw)
@@ -92,9 +134,12 @@ class Atendimentos(db.Model):
         return cls(
             paciente_nome=paciente_nome,
             paciente_cpf=paciente_cpf,
+            paciente_id=paciente_id,
             especialidade=especialidade,
+            especialidade_id=especialidade_id,
             data_hora=data_hora,
             criado_por=criado_por,
+            criado_por_id=criado_por_id,
         )
 
     def update_from_dict(self, data: dict):

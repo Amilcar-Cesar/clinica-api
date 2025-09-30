@@ -16,7 +16,7 @@ class Pacientes(db.Model):
         return {
             'id': self.id,
             'nome': self.nome,
-            'data_nascimento': self.data_nascimento.isoformat() if self.data_nascimento else None,
+            'data_nascimento': self.data_nascimento.strftime("%d-%m-%Y") if self.data_nascimento else None,
             'cpf': self.cpf,
             'cartao_sus': self.cartao_sus,
             'endereco': self.endereco,

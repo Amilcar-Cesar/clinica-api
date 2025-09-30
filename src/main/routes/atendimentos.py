@@ -8,7 +8,15 @@ atendimentos_route_bp = Blueprint("atendimentos_route", __name__)
 
 
 def atendimento_to_dict(a: Atendimentos):
-    return a.to_dict()
+    d = a.to_dict()
+    # include FK ids if available
+    if hasattr(a, 'paciente_id'):
+        d['paciente_id'] = a.paciente_id
+    if hasattr(a, 'especialidade_id'):
+        d['especialidade_id'] = a.especialidade_id
+    if hasattr(a, 'criado_por_id'):
+        d['criado_por_id'] = a.criado_por_id
+    return d
 
 
 @atendimentos_route_bp.route('/', methods=['POST'])
@@ -19,6 +27,12 @@ def create_atendimento():
     if not data.get('criado_por'):
         try:
             data['criado_por'] = current_user.usuario
+        except Exception:
+            pass
+    # also set criado_por_id to current_user.id when available
+    if not data.get('criado_por_id'):
+        try:
+            data['criado_por_id'] = getattr(current_user, 'id', None)
         except Exception:
             pass
     try:
@@ -37,7 +51,46 @@ def create_atendimento():
 @atendimentos_route_bp.route('/', methods=['GET'])
 @login_required
 def list_atendimentos():
-    items = Atendimentos.query.all()
+    # Filters via query params
+    q = Atendimentos.query
+    paciente_id = request.args.get('paciente_id')
+    paciente_cpf = request.args.get('paciente_cpf')
+    especialidade_id = request.args.get('especialidade_id')
+    especialidade = request.args.get('especialidade')
+    start = request.args.get('start')
+    end = request.args.get('end')
+
+    if paciente_id:
+        try:
+            q = q.filter(Atendimentos.paciente_id == int(paciente_id))
+        except ValueError:
+            return jsonify({'error': 'invalid paciente_id'}), 400
+    if paciente_cpf:
+        q = q.filter(Atendimentos.paciente_cpf == paciente_cpf)
+    if especialidade_id:
+        try:
+            q = q.filter(Atendimentos.especialidade_id ==
+                         int(especialidade_id))
+        except ValueError:
+            return jsonify({'error': 'invalid especialidade_id'}), 400
+    if especialidade:
+        q = q.filter(Atendimentos.especialidade.ilike(f"%{especialidade}%"))
+
+    # date range filtering (start/end are parsed using model helper)
+    if start:
+        try:
+            sdt = Atendimentos._parse_datetime(start)
+            q = q.filter(Atendimentos.data_hora >= sdt)
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+    if end:
+        try:
+            edt = Atendimentos._parse_datetime(end)
+            q = q.filter(Atendimentos.data_hora <= edt)
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+
+    items = q.all()
     return jsonify([atendimento_to_dict(i) for i in items])
 
 

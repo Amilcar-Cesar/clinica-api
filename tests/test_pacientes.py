@@ -53,7 +53,7 @@ def test_create_paciente_as_authenticated_user(client):
     assert r.status_code == 201
     data = r.get_json()
     assert data['nome'] == 'Paciente 1'
-    assert data['data_nascimento'] == '1990-08-15'
+    assert data['data_nascimento'] == '15-08-1990'
 
 
 def test_update_paciente_as_authenticated_user(client):
@@ -73,7 +73,7 @@ def test_update_paciente_as_authenticated_user(client):
         f'/pacientes/{p.id}', json={'data_nascimento': '20-12-1985', 'endereco': 'Nova Rua'})
     assert r.status_code == 200
     data = r.get_json()
-    assert data['data_nascimento'] == '1985-12-20'
+    assert data['data_nascimento'] == '20-12-1985'
     assert data['endereco'] == 'Nova Rua'
 
 
