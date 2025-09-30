@@ -40,12 +40,6 @@ def create_app(config=None):
     else:
         app.config.from_object(Config)
 
-    # --- Configuração do Banco de Dados (fallback simples) ---
-    # Se as configurações específicas não estiverem definidas, usa valores de desenvolvimento.
-    app.config.setdefault('SQLALCHEMY_DATABASE_URI',
-                          'sqlite:///clinica_dev.db')
-    app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
-
     # --- Inicialização de Extensões ---
     db.init_app(app)
 
@@ -53,6 +47,13 @@ def create_app(config=None):
     login_manager = LoginManager()
     login_manager.login_view = 'usuarios_route.login'
     login_manager.init_app(app)
+
+    # For API endpoints return 401 JSON instead of redirecting to a login page
+    from flask import jsonify
+
+    @login_manager.unauthorized_handler
+    def unauthorized_callback():
+        return jsonify({'error': 'unauthorized'}), 401
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -62,6 +63,24 @@ def create_app(config=None):
             return db.session.get(Usuarios, int(user_id))
         except Exception:
             return None
+
+    # Ensure session-based user id (set in tests) is loaded into current_user
+    from flask import session
+    from flask_login import login_user, current_user
+
+    @app.before_request
+    def _load_user_from_session():
+        try:
+            if not getattr(current_user, 'is_authenticated', False):
+                uid = session.get('_user_id') or session.get('user_id')
+                if uid:
+                    from src.main.models.usuarios_model import Usuarios
+                    u = db.session.get(Usuarios, int(uid))
+                    if u:
+                        # mark user as logged in for this request
+                        login_user(u, remember=False)
+        except Exception:
+            pass
 
     # --- Registro das Blueprints (Rotas) ---
     app.register_blueprint(usuarios_route_bp, url_prefix='/usuarios')

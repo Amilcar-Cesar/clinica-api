@@ -3,6 +3,5 @@ Flask-SQLAlchemy
 Flask-Login
 Werkzeug
 pymysql
-mysql-connector-python
 cryptography
 pytest
