@@ -6,3 +6,4 @@ pymysql
 cryptography
 pytest
 python-dotenv
+Flask-Migrate
