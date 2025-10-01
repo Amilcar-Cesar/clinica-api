@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from src.main.repository.database import db
 import os
 from dotenv import load_dotenv
+from flask_migrate import Migrate
 
 # Importe suas blueprints aqui
 from src.main.routes.usuarios import usuarios_route_bp
@@ -21,7 +22,7 @@ MYSQL_DATABASE = os.getenv('MYSQL_DATABASE')
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'troque-em-producao')
-    
+
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'SQLALCHEMY_DATABASE_URI') or f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -42,6 +43,10 @@ def create_app(config=None):
 
     # --- Inicialização de Extensões ---
     db.init_app(app)
+
+    # --- Flask-Migrate ---
+    migrate = Migrate()
+    migrate.init_app(app, db)
 
     # --- Flask-Login ---
     login_manager = LoginManager()
