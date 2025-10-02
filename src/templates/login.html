@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - ClinicManager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Acessar Sistema</h2>
+        
+        <form action="{{ url_for('usuarios_route.login') }}" method="POST">
+          
+          <div class="mb-3">
+            <label for="usuario" class="form-label">Usuário</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+              <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Seu usuário" required>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <div class="input-group">
+               <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+              <input type="password" class="form-control" id="senha" name="senha" placeholder="Sua senha" required>
+            </div>
+          </div>
+          
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+          </div>
+          
+        </form>
+        
+        {% if error %}
+          <div class="alert alert-danger mt-3" role="alert">
+            {{ error }}
+          </div>
+        {% endif %}
+        
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

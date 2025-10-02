@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, redirect, url_for,render_template
 from flask_login import login_required, current_user
 from src.main.repository.database import db
 from src.main.models.usuarios_model import Usuarios
@@ -38,23 +38,25 @@ def register():
     return jsonify(user_to_dict(new_user)), 201
 
 
-@usuarios_route_bp.route('/login', methods=['POST'])
+@usuarios_route_bp.route('/login', methods=['POST', 'GET'])
 def login():
-    data = request.get_json(silent=True)
-    if not data:
-        data = request.form.to_dict() or {}
-    usuario = data.get('usuario')
-    senha = data.get('senha')
+    if request.method == 'POST':
+        usuario = request.form.get('usuario')
+        senha = request.form.get('senha')
 
-    if not usuario or not senha:
-        return jsonify({'error': 'usuario and senha are required'}), 400
+        if not usuario or not senha:
+            return render_template('login.html', error='Usuário e senha são obrigatórios')
 
-    user = Usuarios.query.filter_by(usuario=usuario).first()
-    if not user or not verify_password(user.senha, senha):
-        return jsonify({'error': 'invalid credentials'}), 401
+        user = Usuarios.query.filter_by(usuario=usuario).first()
+        if not user or not verify_password(user.senha, senha):
+            return render_template('login.html', error='Credenciais inválidas')
 
-    perform_login(user)
-    return jsonify({'message': 'logged in', 'user': user_to_dict(user)})
+        perform_login(user)
+
+        return jsonify({'message': 'logged in', 'user': user_to_dict(user)}) #mudar para uma rota principal
+
+
+    return render_template('login.html')
 
 
 @usuarios_route_bp.route('/logout', methods=['POST'])

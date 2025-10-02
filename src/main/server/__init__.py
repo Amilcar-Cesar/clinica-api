@@ -33,7 +33,7 @@ def create_app(config=None):
     Função que cria e configura a instância da aplicação Flask.
     Este é o padrão Application Factory.
     """
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
     # Carregue configurações (se houver um objeto/config passado, use-o)
     if config:
