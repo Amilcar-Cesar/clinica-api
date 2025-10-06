@@ -53,7 +53,7 @@ def login():
 
         perform_login(user)
 
-        return jsonify({'message': 'logged in', 'user': user_to_dict(user)}) #mudar para uma rota principal
+        return render_template('base.html')
 
 
     return render_template('login.html')

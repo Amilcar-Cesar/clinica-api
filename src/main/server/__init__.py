@@ -10,7 +10,7 @@ from src.main.routes.usuarios import usuarios_route_bp
 from src.main.routes.pacientes import pacientes_route_bp
 from src.main.routes.atendimentos import atendimentos_route_bp
 from src.main.routes.especialidades import especialidades_route_bp
-
+from src.main.routes.home import home_route_bp
 
 load_dotenv()  # procura .env na árvore de diretórios
 
@@ -33,7 +33,7 @@ def create_app(config=None):
     Função que cria e configura a instância da aplicação Flask.
     Este é o padrão Application Factory.
     """
-    app = Flask(__name__, template_folder='../templates', static_folder='../static')
+    app = Flask(__name__, template_folder='../../templates', static_folder='../../static')
 
     # Carregue configurações (se houver um objeto/config passado, use-o)
     if config:
@@ -93,5 +93,6 @@ def create_app(config=None):
     app.register_blueprint(atendimentos_route_bp, url_prefix='/atendimentos')
     app.register_blueprint(especialidades_route_bp,
                            url_prefix='/especialidades')
+    app.register_blueprint(home_route_bp, url_prefix='/')
 
     return app

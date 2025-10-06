@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, render_template
 from flask_login import login_required, current_user
 from src.main.repository.database import db
 from src.main.models.pacientes_model import Pacientes
@@ -12,22 +12,23 @@ def paciente_to_dict(p: Pacientes):
     return p.to_dict()
 
 
-@pacientes_route_bp.route('/', methods=['POST'])
+@pacientes_route_bp.route('/', methods=['POST', 'GET'])
 @login_required
 def create_paciente():
-    data = request.get_json(silent=True) or request.form.to_dict() or {}
-    try:
-        paciente = Pacientes.from_dict(data)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    db.session.add(paciente)
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': 'database error', 'detail': str(e)}), 500
-    return jsonify(paciente_to_dict(paciente)), 201
-
+    if request.method == 'POST': 
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+        try:
+            paciente = Pacientes.from_dict(data)
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+        db.session.add(paciente)
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'database error', 'detail': str(e)}), 500
+        return jsonify(paciente_to_dict(paciente)), 201
+    return render_template('exemplo_form.html')
 
 @pacientes_route_bp.route('/<int:paciente_id>', methods=['GET'])
 @login_required
