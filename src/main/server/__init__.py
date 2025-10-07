@@ -93,6 +93,6 @@ def create_app(config=None):
     app.register_blueprint(atendimentos_route_bp, url_prefix='/atendimentos')
     app.register_blueprint(especialidades_route_bp,
                            url_prefix='/especialidades')
-    app.register_blueprint(home_route_bp, url_prefix='/')
+    app.register_blueprint(home_route_bp)
 
     return app

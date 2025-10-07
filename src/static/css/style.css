@@ -1,0 +1,41 @@
+/* Estilo geral para um fundo mais suave */
+body {
+    background-color: #f8f9fa;
+}
+
+/* Estilo para os cartões de resumo */
+.summary-card {
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card.active {
+    border-left: 4px solid #0d6efd; /* Borda azul para o card ativo */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card .icon-lg {
+    font-size: 2rem; /* Tamanho dos ícones */
+    color: #adb5bd;
+}
+
+.summary-card.active .icon-lg {
+    color: #0d6efd; /* Cor do ícone no card ativo */
+}
+
+/* Remove a borda padrão do card principal da lista */
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Alinhamento dos botões de ação na tabela */
+.action-buttons a, .action-buttons button {
+    margin: 0 4px;
+}

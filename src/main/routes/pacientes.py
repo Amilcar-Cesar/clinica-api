@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request, abort, render_template
-from flask_login import login_required, current_user
+from flask_login import login_required
+from sqlalchemy import or_
 from src.main.repository.database import db
 from src.main.models.pacientes_model import Pacientes
-from src.main.models.usuarios_model import Usuarios
 from src.main.services.auth import is_admin
 
 pacientes_route_bp = Blueprint("pacientes_route", __name__)
@@ -58,11 +58,25 @@ def update_paciente(paciente_id):
     return jsonify(paciente_to_dict(paciente))
 
 
-@pacientes_route_bp.route('/', methods=['GET'])
+@pacientes_route_bp.route('/search', methods=['GET'])
 @login_required
-def list_pacientes():
-    pacs = Pacientes.query.all()
-    return jsonify([paciente_to_dict(p) for p in pacs])
+def search_pacientes():
+    # Pega o termo de busca da query string (ex: /search?q=joao)
+    query = request.args.get('q', '', type=str)
+    
+    if not query:
+        return jsonify([]) # Retorna lista vazia se não houver busca
+
+    # Filtra pacientes cujo nome OU CPF contenham o termo da busca (case-insensitive)
+    pacientes = Pacientes.query.filter(
+        or_(
+            Pacientes.nome.ilike(f'%{query}%'),
+            Pacientes.cpf.ilike(f'%{query}%')
+        )
+    ).limit(10).all() # Limita a 10 resultados para performance
+
+    # Retorna a lista de pacientes encontrados em formato JSON
+    return jsonify([paciente.to_dict() for paciente in pacientes])
 
 
 @pacientes_route_bp.route('/<int:paciente_id>', methods=['DELETE'])

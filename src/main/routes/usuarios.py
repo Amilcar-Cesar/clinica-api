@@ -53,8 +53,7 @@ def login():
 
         perform_login(user)
 
-        return render_template('base.html')
-
+        return redirect(url_for('home_route.home'))
 
     return render_template('login.html')
 
@@ -63,7 +62,7 @@ def login():
 @login_required
 def logout():
     perform_logout()
-    return jsonify({'message': 'logged out'})
+    return redirect(url_for('usuarios_route.login'))
 
 
 @usuarios_route_bp.route('/', methods=['GET'])
