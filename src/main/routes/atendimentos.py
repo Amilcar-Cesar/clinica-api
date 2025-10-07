@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, redirect, url_for
 from flask_login import login_required, current_user
 from src.main.repository.database import db
 from src.main.models.atendimentos_model import Atendimentos
@@ -22,30 +22,35 @@ def atendimento_to_dict(a: Atendimentos):
 @atendimentos_route_bp.route('/', methods=['POST'])
 @login_required
 def create_atendimento():
-    data = request.get_json(silent=True) or request.form.to_dict() or {}
-    # ensure criado_por is set to current_user.usuario when available
-    if not data.get('criado_por'):
-        try:
-            data['criado_por'] = current_user.usuario
-        except Exception:
-            pass
-    # also set criado_por_id to current_user.id when available
-    if not data.get('criado_por_id'):
-        try:
-            data['criado_por_id'] = getattr(current_user, 'id', None)
-        except Exception:
-            pass
+    form_data = request.form.to_dict()
+
+    # 2. Adicionar o ID do usuário logado (criador do atendimento)
+    #    Isso garante que sabemos quem registrou o atendimento.
+    form_data['criado_por_id'] = current_user.id
+
     try:
-        atendimento = Atendimentos.from_dict(data)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    db.session.add(atendimento)
-    try:
+        # 3. Chamar a lógica do modelo para criar a instância do atendimento.
+        #    O método 'from_dict' que você criou é inteligente o suficiente
+        #    para usar 'paciente_id' para encontrar o nome do paciente.
+        atendimento = Atendimentos.from_dict(form_data)
+        
+        # 4. Adicionar ao banco de dados e salvar
+        db.session.add(atendimento)
         db.session.commit()
+
+    except ValueError as e:
+        # Em caso de erro de validação (ex: paciente_id não existe),
+        # você pode redirecionar com uma mensagem de erro no futuro.
+        # Por enquanto, retornamos um erro simples.
+        return f"Erro de Validação: {str(e)}", 400
     except Exception as e:
+        # Em caso de erro de banco de dados
         db.session.rollback()
-        return jsonify({'error': 'database error', 'detail': str(e)}), 500
-    return jsonify(atendimento_to_dict(atendimento)), 201
+        return f"Erro no Banco de Dados: {str(e)}", 500
+
+    # 5. Se tudo der certo, redirecionar de volta para a página inicial.
+    #    Isso fará a página recarregar com o novo atendimento na lista.
+    return redirect(url_for('home_route.home'))
 
 
 @atendimentos_route_bp.route('/', methods=['GET'])

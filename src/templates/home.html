@@ -76,7 +76,6 @@
                             <td>{{ atendimento.paciente_nome }}</td>
                             <td>{{ atendimento.paciente_cpf or 'N/A' }}</td>
                             <td>{{ atendimento.especialidade or 'N/A' }}</td>
-                            <td>{{ atendimento.data_hora.strftime('%d-%m-%Y %H:%M') }}</td>
                             <td>{{ atendimento.criado_por }}</td>
                             <td>{{ atendimento.criado_em.strftime('%d-%m-%Y %H:%M') }}</td>
                         </tr>
@@ -118,11 +117,11 @@
               {% endfor %}
             </select>
           </div>
-
-          <div class="mb-3">
+        <div class="mb-3">
             <label for="dataHora" class="form-label">Data e Hora do Atendimento</label>
             <input type="datetime-local" class="form-control" name="data_hora" id="dataHora" required>
-          </div>
+        </div>
+          
 
         </div>
         <div class="modal-footer">

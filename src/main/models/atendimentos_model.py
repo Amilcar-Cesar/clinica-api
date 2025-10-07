@@ -81,54 +81,54 @@ class Atendimentos(db.Model):
 
     @classmethod
     def from_dict(cls, data: dict):
-        paciente_nome = data.get('paciente_nome') or data.get(
-            'nome_paciente') or data.get('nome')
-        paciente_cpf = data.get('paciente_cpf') or data.get('cpf')
-        especialidade = data.get('especialidade') or data.get(
-            'nome_especialidade') or data.get('especialidade_nome')
-        data_hora_raw = data.get('data_hora') or data.get(
-            'data') or data.get('horario')
-        criado_por = data.get('criado_por') or data.get(
-            'usuario') or data.get('username')
+        # Inicializa variáveis
+        paciente_nome = None
+        paciente_cpf = None
+
         paciente_id = data.get('paciente_id')
         especialidade_id = data.get('especialidade_id')
         criado_por_id = data.get('criado_por_id')
-
-        if not paciente_nome:
-            raise ValueError('paciente_nome is required')
-        if not criado_por and not criado_por_id:
-            raise ValueError(
-                'criado_por (username) or criado_por_id is required')
-
-        # Validate foreign keys if provided and populate snapshots
-        if paciente_id is not None:
+        
+       
+        if paciente_id:
             from src.main.models.pacientes_model import Pacientes
             p = db.session.get(Pacientes, int(paciente_id))
             if p is None:
-                raise ValueError(f'paciente_id {paciente_id} does not exist')
+                raise ValueError(f'Paciente com ID {paciente_id} não existe')
+            
             paciente_nome = p.nome
             paciente_cpf = p.cpf
+        else:
+            paciente_nome = data.get('paciente_nome')
 
-        if especialidade_id is not None:
+        
+        if not paciente_nome:
+            raise ValueError('É necessário selecionar um paciente (paciente_id) ou informar um nome (paciente_nome).')
+        
+        if not criado_por_id:
+            raise ValueError('ID do criador do atendimento (criado_por_id) é obrigatório.')
+
+        # Valida especialidade_id e busca nome
+        especialidade = data.get('especialidade')
+        if especialidade_id:
             from src.main.models.especialidades_model import Especialidades
             e = db.session.get(Especialidades, int(especialidade_id))
             if e is None:
-                raise ValueError(
-                    f'especialidade_id {especialidade_id} does not exist')
+                raise ValueError(f'Especialidade com ID {especialidade_id} não existe')
             especialidade = e.nome_especialidade
 
-        if criado_por_id is not None:
-            from src.main.models.usuarios_model import Usuarios
-            u = db.session.get(Usuarios, int(criado_por_id))
-            if u is None:
-                raise ValueError(
-                    f'criado_por_id {criado_por_id} does not exist')
-            criado_por = u.usuario
-
+        # Valida criado_por_id e busca nome de usuário
+        from src.main.models.usuarios_model import Usuarios
+        u = db.session.get(Usuarios, int(criado_por_id))
+        if u is None:
+            raise ValueError(f'Usuário com ID {criado_por_id} não existe')
+        criado_por = u.usuario
+        
+        # Lógica para data_hora
+        data_hora_raw = data.get('data_hora')
         if data_hora_raw:
             data_hora = cls._parse_datetime(data_hora_raw)
         else:
-            # default to now
             data_hora = datetime.now()
 
         return cls(
@@ -141,7 +141,7 @@ class Atendimentos(db.Model):
             criado_por=criado_por,
             criado_por_id=criado_por_id,
         )
-
+    
     def update_from_dict(self, data: dict):
         if 'paciente_nome' in data and data['paciente_nome'] is not None:
             self.paciente_nome = data['paciente_nome']
