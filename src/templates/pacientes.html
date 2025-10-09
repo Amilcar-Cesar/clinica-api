@@ -44,7 +44,7 @@
                                         data-endereco="{{ paciente.endereco or '' }}">
                                     <i class="bi bi-pencil-fill"></i>
                                 </button>
-                                <form action="{{ url_for('pacientes_route.delete_paciente', paciente_id=paciente.id) }}" method="DELETE" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este paciente?');">
+                                <form action="{{ url_for('pacientes_route.delete_paciente', paciente_id=paciente.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este paciente?');">
                                     <button type="submit" class="btn btn-danger btn-sm">
                                         <i class="bi bi-trash-fill"></i>
                                     </button>

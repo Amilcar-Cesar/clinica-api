@@ -81,14 +81,13 @@ def search_pacientes():
     return jsonify([paciente.to_dict() for paciente in pacientes])
 
 
-@pacientes_route_bp.route('/<int:paciente_id>', methods=['DELETE'])
+@pacientes_route_bp.route('/<int:paciente_id>', methods=['POST'])
 @login_required
 def delete_paciente(paciente_id):
     if not is_admin():
         abort(403)
     paciente = db.session.get(Pacientes, paciente_id)
-    if paciente is None:
-        abort(404)
-    db.session.delete(paciente)
-    db.session.commit()
+    if paciente:
+        db.session.delete(paciente)
+        db.session.commit()
     return redirect(url_for('pacientes_route.list_pacientes'))
