@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort, render_template
+from flask import Blueprint, jsonify, request, abort, render_template, redirect, url_for
 from flask_login import login_required
 from sqlalchemy import or_
 from src.main.repository.database import db
@@ -12,23 +12,25 @@ def paciente_to_dict(p: Pacientes):
     return p.to_dict()
 
 
-@pacientes_route_bp.route('/', methods=['POST', 'GET'])
+@pacientes_route_bp.route('/', methods=['POST'])
 @login_required
 def create_paciente():
-    if request.method == 'POST': 
-        data = request.get_json(silent=True) or request.form.to_dict() or {}
-        try:
-            paciente = Pacientes.from_dict(data)
-        except ValueError as e:
-            return jsonify({'error': str(e)}), 400
+    try:
+        paciente = Pacientes.from_dict(request.form.to_dict())
         db.session.add(paciente)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': 'database error', 'detail': str(e)}), 500
-        return jsonify(paciente_to_dict(paciente)), 201
-    return render_template('exemplo_form.html')
+        db.session.commit()
+    except Exception as e:
+        print(f"Erro ao criar paciente: {e}")
+
+    return redirect(url_for('pacientes_route.list_pacientes'))
+
+
+@pacientes_route_bp.route('/', methods=['GET'])
+@login_required
+def list_pacientes():
+    pacientes = Pacientes.query.order_by(Pacientes.nome).all()
+    return render_template('pacientes.html', pacientes=pacientes)
+
 
 @pacientes_route_bp.route('/<int:paciente_id>', methods=['GET'])
 @login_required
@@ -45,9 +47,9 @@ def update_paciente(paciente_id):
     paciente = db.session.get(Pacientes, paciente_id)
     if paciente is None:
         abort(404)
-    data = request.get_json(silent=True) or request.form.to_dict() or {}
+   
     try:
-        paciente.update_from_dict(data)
+        paciente.update_from_dict(request.form.to_dict())
         db.session.commit()
     except ValueError as e:
         db.session.rollback()
@@ -55,7 +57,7 @@ def update_paciente(paciente_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'database error', 'detail': str(e)}), 500
-    return jsonify(paciente_to_dict(paciente))
+    return redirect(url_for('pacientes_route.list_pacientes'))
 
 
 @pacientes_route_bp.route('/search', methods=['GET'])
@@ -83,10 +85,10 @@ def search_pacientes():
 @login_required
 def delete_paciente(paciente_id):
     if not is_admin():
-        return jsonify({'error': 'forbidden'}), 403
+        abort(403)
     paciente = db.session.get(Pacientes, paciente_id)
     if paciente is None:
         abort(404)
     db.session.delete(paciente)
     db.session.commit()
-    return jsonify({'message': 'deleted'})
+    return redirect(url_for('pacientes_route.list_pacientes'))

@@ -48,4 +48,40 @@ document.addEventListener('DOMContentLoaded', function() {
       searchPacientes(pacienteSearchInput.value);
     });
   
-  });
+    // LÓGICA PARA O MODAL DE EDIÇÃO DE PACIENTES
+    const editPacienteModal = document.getElementById('editPacienteModal');
+    if (editPacienteModal) {
+      editPacienteModal.addEventListener('show.bs.modal', function (event) {
+          const button = event.relatedTarget; // O botão que acionou o modal
+
+          // Extrai os dados dos atributos data-* do botão
+          const id = button.getAttribute('data-id');
+          const nome = button.getAttribute('data-nome');
+          const nascimento = button.getAttribute('data-nascimento');
+          const cpf = button.getAttribute('data-cpf');
+          const sus = button.getAttribute('data-sus');
+          const endereco = button.getAttribute('data-endereco');
+
+          // Encontra o formulário e os inputs do modal
+          const form = document.getElementById('editPacienteForm');
+          const idInput = document.getElementById('editPacienteId');
+          const nomeInput = document.getElementById('editNome');
+          const nascimentoInput = document.getElementById('editDataNascimento');
+          const cpfInput = document.getElementById('editCpf');
+          const susInput = document.getElementById('editCartaoSus');
+          const enderecoInput = document.getElementById('editEndereco');
+
+          // Atualiza a action do formulário para o URL de update correto
+          form.action = `/pacientes/${id}/update`;
+
+          // Preenche os campos do formulário com os dados do paciente
+          idInput.value = id;
+          nomeInput.value = nome;
+          nascimentoInput.value = nascimento;
+          cpfInput.value = cpf;
+          susInput.value = sus;
+          enderecoInput.value = endereco;
+      });
+    }
+
+});

@@ -13,5 +13,5 @@ home_route_bp = Blueprint("home_route", __name__)
 def home():
     atendimentos = Atendimentos.query.order_by(Atendimentos.data_hora.desc()).all()
     especialidades = Especialidades.query.order_by(Especialidades.nome_especialidade).all()
-    pacientes = Pacientes.query.order_by(Pacientes.nome).all()
-    return render_template('home.html',atendimentos=atendimentos, pacientes=pacientes, especialidades=especialidades)
+    
+    return render_template('home.html',atendimentos=atendimentos, especialidades=especialidades)

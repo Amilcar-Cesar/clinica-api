@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Pacientes{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title">Lista de Pacientes</h3>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoPacienteModal">
+                    <i class="bi bi-plus-lg"></i> Novo Paciente
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Data Nascimento</th>
+                            <th scope="col">CPF</th>
+                            <th scope="col">Cartão SUS</th>
+                            <th scope="col">Endereço</th>
+                            <th scope="col" class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paciente in pacientes %}
+                        <tr>
+                            <td>{{ paciente.nome }}</td>
+                            <td>{{ paciente.data_nascimento or 'N/A' }}</td>
+                            <td>{{ paciente.cpf or 'N/A' }}</td>
+                            <td>{{ paciente.cartao_sus or 'N/A' }}</td>
+                            <td>{{ paciente.endereco or 'N/A' }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-outline-primary btn-sm edit-btn"
+                                        data-bs-toggle="modal" data-bs-target="#editPacienteModal"
+                                        data-id="{{ paciente.id }}"
+                                        data-nome="{{ paciente.nome }}"
+                                        data-nascimento="{{ paciente.data_nascimento_form }}"
+                                        data-cpf="{{ paciente.cpf or '' }}"
+                                        data-sus="{{ paciente.cartao_sus or '' }}"
+                                        data-endereco="{{ paciente.endereco or '' }}">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <form action="{{ url_for('pacientes_route.delete_paciente', paciente_id=paciente.id) }}" method="DELETE" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este paciente?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Nenhum paciente encontrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="novoPacienteModal" tabindex="-1" aria-labelledby="novoPacienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="novoPacienteModalLabel">Novo Paciente</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('pacientes_route.create_paciente') }}" method="POST">
+        <div class="modal-body">
+          <p class="text-muted">Preencha os dados do novo paciente</p>
+          <div class="mb-3">
+            <label for="nome" class="form-label">Nome Completo</label>
+            <input type="text" class="form-control" name="nome" required>
+          </div>
+          <div class="mb-3">
+            <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+            <input type="date" class="form-control" name="data_nascimento">
+          </div>
+          <div class="mb-3">
+            <label for="cpf" class="form-label">CPF</label>
+            <input type="text" class="form-control" name="cpf">
+          </div>
+          <div class="mb-3">
+            <label for="cartao_sus" class="form-label">Cartão SUS</label>
+            <input type="text" class="form-control" name="cartao_sus">
+          </div>
+          <div class="mb-3">
+            <label for="endereco" class="form-label">Endereço</label>
+            <input type="text" class="form-control" name="endereco">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editPacienteModal" tabindex="-1" aria-labelledby="editPacienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editPacienteModalLabel">Editar Paciente</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editPacienteForm" method="PATCH">
+        <div class="modal-body">
+          <input type="hidden" name="paciente_id" id="editPacienteId">
+          <div class="mb-3">
+            <label for="editNome" class="form-label">Nome Completo</label>
+            <input type="text" class="form-control" name="nome" id="editNome" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDataNascimento" class="form-label">Data de Nascimento</label>
+            <input type="date" class="form-control" name="data_nascimento" id="editDataNascimento">
+          </div>
+          <div class="mb-3">
+            <label for="editCpf" class="form-label">CPF</label>
+            <input type="text" class="form-control" name="cpf" id="editCpf">
+          </div>
+          <div class="mb-3">
+            <label for="editCartaoSus" class="form-label">Cartão SUS</label>
+            <input type="text" class="form-control" name="cartao_sus" id="editCartaoSus">
+          </div>
+          <div class="mb-3">
+            <label for="editEndereco" class="form-label">Endereço</label>
+            <input type="text" class="form-control" name="endereco" id="editEndereco">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
