@@ -1,28 +1,23 @@
-/* Estilo geral para um fundo mais suave */
-body {
-    background-color: #f8f9fa;
-}
-
 /* Estilo para os cartões de resumo */
 .summary-card {
-    border: 1px solid #e9ecef;
+    border: 1px solid #ffffff;
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 }
 
 .summary-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
 .summary-card.active {
-    border-left: 4px solid #0d6efd; /* Borda azul para o card ativo */
+    border-left: 4px solid #086bff; /* Borda azul para o card ativo */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .summary-card .icon-lg {
     font-size: 2rem; /* Tamanho dos ícones */
-    color: #adb5bd;
+    color: #b6c2ce;
 }
 
 .summary-card.active .icon-lg {
@@ -32,10 +27,23 @@ body {
 /* Remove a borda padrão do card principal da lista */
 .card {
     border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.05);
 }
 
 /* Alinhamento dos botões de ação na tabela */
 .action-buttons a, .action-buttons button {
     margin: 0 4px;
+}
+
+/* Em src/main/static/css/style.css */
+
+/* Garante que o título principal seja claro no tema escuro */
+.page-header h1 {
+    color: #dee2e6; /* Um branco suave do Bootstrap */
+}
+
+/* Garante que o subtítulo seja mais suave (muted) */
+.page-header p {
+    color: #adb5bd; /* Cor padrão 'muted' do Bootstrap */
+    font-size: 1.1rem;
 }

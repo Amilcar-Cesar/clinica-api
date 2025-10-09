@@ -41,7 +41,7 @@ def get_paciente(paciente_id):
     return jsonify(paciente_to_dict(paciente))
 
 
-@pacientes_route_bp.route('/<int:paciente_id>', methods=['PUT', 'PATCH'])
+@pacientes_route_bp.route('/<int:paciente_id>', methods=['POST'])
 @login_required
 def update_paciente(paciente_id):
     paciente = db.session.get(Pacientes, paciente_id)
