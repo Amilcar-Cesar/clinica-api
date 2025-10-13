@@ -1,49 +1,56 @@
-/* Estilo para os cartões de resumo */
-.summary-card {
-    border: 1px solid #ffffff;
+/* 1. Define o fundo principal como branco */
+body {
+    background-color: #ffffff;
+}
+
+/* 2. Estilo para os textos do cabeçalho da página */
+.page-header h1 {
+    color: #212529; /* Cor de texto padrão (preto suave) */
+    font-weight: 600;
+}
+.page-header p {
+    color: #6c757d; /* Cor de texto 'muted' (cinza) */
+}
+
+/* 3. Estilo para os cards de resumo e o card da tabela */
+.summary-card,
+.card {
+    background-color: #f8f9fa; /* Fundo cinza bem claro para criar contraste */
+    border: 1px solid #dee2e6;  /* Borda sutil */
+    box-shadow: none; /* Remove a sombra antiga para um look mais 'flat' */
     transition: all 0.2s ease-in-out;
+}
+
+.summary-card {
     cursor: pointer;
 }
 
 .summary-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    border-color: #a7b3c2;
 }
 
 .summary-card.active {
-    border-left: 4px solid #086bff; /* Borda azul para o card ativo */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #0d6efd;
+    background-color: #ffffff; /* Deixa o card ativo branco para mais destaque */
 }
 
 .summary-card .icon-lg {
-    font-size: 2rem; /* Tamanho dos ícones */
-    color: #b6c2ce;
+    font-size: 1.8rem;
+    color: #6c757d;
 }
 
 .summary-card.active .icon-lg {
-    color: #0d6efd; /* Cor do ícone no card ativo */
+    color: #0d6efd;
 }
 
-/* Remove a borda padrão do card principal da lista */
-.card {
-    border: none;
-    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.05);
+/* 4. Estilo para o cabeçalho da tabela */
+.table-light {
+    --bs-table-bg: #ffffff; /* Deixa o cabeçalho da tabela branco */
+    --bs-table-border-color: #dee2e6;
 }
 
-/* Alinhamento dos botões de ação na tabela */
-.action-buttons a, .action-buttons button {
-    margin: 0 4px;
-}
-
-/* Em src/main/static/css/style.css */
-
-/* Garante que o título principal seja claro no tema escuro */
-.page-header h1 {
-    color: #dee2e6; /* Um branco suave do Bootstrap */
-}
-
-/* Garante que o subtítulo seja mais suave (muted) */
-.page-header p {
-    color: #adb5bd; /* Cor padrão 'muted' do Bootstrap */
-    font-size: 1.1rem;
+/* Botão de sair no cabeçalho */
+.page-header .btn {
+    border-width: 2px;
 }
