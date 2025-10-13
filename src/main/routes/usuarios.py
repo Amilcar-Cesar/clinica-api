@@ -135,7 +135,7 @@ def update_user(user_id):
     return jsonify(user_to_dict(user))
 
 
-@usuarios_route_bp.route('/<int:user_id>', methods=['DELETE'])
+@usuarios_route_bp.route('/<int:user_id>', methods=['POST'])
 @login_required
 def delete_user(user_id):
     user = db.session.get(Usuarios, user_id)
