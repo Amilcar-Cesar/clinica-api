@@ -45,6 +45,7 @@
                                     <i class="bi bi-pencil-fill"></i>
                                 </button>
                                 <form action="{{ url_for('pacientes_route.delete_paciente', paciente_id=paciente.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este paciente?');">
+                                  {{ csrf_token() }}
                                     <button type="submit" class="btn btn-danger btn-sm">
                                         <i class="bi bi-trash-fill"></i>
                                     </button>
@@ -71,6 +72,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="{{ url_for('pacientes_route.create_paciente') }}" method="POST">
+        {{ csrf_token() }}
         <div class="modal-body">
           <p class="text-muted">Preencha os dados do novo paciente</p>
           <div class="mb-3">
@@ -111,6 +113,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="editPacienteForm" method="POST">
+        {{ csrf_token() }}
         <div class="modal-body">
           <input type="hidden" name="paciente_id" id="editPacienteId">
           <div class="mb-3">

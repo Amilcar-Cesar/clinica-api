@@ -4,6 +4,7 @@ from src.main.repository.database import db
 import os
 from dotenv import load_dotenv
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 
 # Importe suas blueprints aqui
 from src.main.routes.usuarios import usuarios_route_bp
@@ -35,6 +36,8 @@ def create_app(config=None):
     """
     app = Flask(__name__, template_folder='../../templates', static_folder='../../static')
 
+    
+
     # Carregue configurações (se houver um objeto/config passado, use-o)
     if config:
         app.config.from_object(config)
@@ -44,6 +47,9 @@ def create_app(config=None):
     # --- Inicialização de Extensões ---
     db.init_app(app)
 
+    #--- Inicialização do CSRF
+    csrf = CSRFProtect(app)
+    
     # --- Flask-Migrate ---
     migrate = Migrate()
     migrate.init_app(app, db)

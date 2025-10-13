@@ -7,3 +7,4 @@ cryptography
 pytest
 python-dotenv
 Flask-Migrate
+Flask-WTF

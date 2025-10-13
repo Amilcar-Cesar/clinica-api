@@ -10,7 +10,7 @@
         <h2 class="card-title text-center mb-4">Acessar Sistema</h2>
         
         <form action="{{ url_for('usuarios_route.login') }}" method="POST">
-          
+          {{ csrf_token() }}
           <div class="mb-3">
             <label for="usuario" class="form-label">Usuário</label>
             <div class="input-group">
