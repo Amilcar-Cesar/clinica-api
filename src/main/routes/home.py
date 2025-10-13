@@ -14,7 +14,7 @@ def home():
     
     view = request.args.get('view', 'atendimentos', type=str)
 
-    atendimentos = Atendimentos.query.order_by(Atendimentos.data_hora.desc()).all()
+    atendimentos = Atendimentos.query.order_by(Atendimentos.criado_em.desc()).all()
     especialidades = Especialidades.query.order_by(Especialidades.nome_especialidade).all()
     pacientes = Pacientes.query.order_by(Pacientes.nome).all()
 

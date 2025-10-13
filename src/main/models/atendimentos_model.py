@@ -8,23 +8,12 @@ class Atendimentos(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     paciente_nome = db.Column(db.String(120), nullable=False)
     paciente_cpf = db.Column(db.String(14), nullable=True)
-    # optional FK to Pacientes table; when provided we validate existence and
-    # snapshot paciente_nome/paciente_cpf for denormalized read.
-    paciente_id = db.Column(db.Integer, db.ForeignKey(
-        'pacientes.id'), nullable=True)
-
+    paciente_id = db.Column(db.Integer, db.ForeignKey('pacientes.id'), nullable=True)
     especialidade = db.Column(db.String(120), nullable=True)
-    # optional FK to Especialidades
-    especialidade_id = db.Column(db.Integer, db.ForeignKey(
-        'especialidades.id'), nullable=True)
-    data_hora = db.Column(db.DateTime, nullable=False)
-    # snapshot of username who created the atendimento
+    especialidade_id = db.Column(db.Integer, db.ForeignKey('especialidades.id'), nullable=True)
     criado_por = db.Column(db.String(80), nullable=False)
-    # FK to Usuarios (id) for stronger relation validation/audit
-    criado_por_id = db.Column(
-        db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    criado_em = db.Column(db.DateTime, nullable=False,
-                          server_default=db.func.now())
+    criado_por_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    criado_em = db.Column(db.DateTime, nullable=False,server_default=db.func.now())
 
     def to_dict(self):
         return {
@@ -32,52 +21,14 @@ class Atendimentos(db.Model):
             'paciente_nome': self.paciente_nome,
             'paciente_cpf': self.paciente_cpf,
             'especialidade': self.especialidade,
-            'data_hora': self.data_hora.strftime("%d-%m-%Y %H:%M:%S") if self.data_hora else None,
             'criado_por': self.criado_por,
             'criado_em': self.criado_em.strftime("%d-%m-%Y %H:%M:%S") if self.criado_em else None,
         }
 
     def __repr__(self):
-        return f"<Atendimento id={self.id} paciente={self.paciente_nome} especialidade={self.especialidade} data_hora={self.data_hora}>"
+        return f"<Atendimento id={self.id} paciente={self.paciente_nome} especialidade={self.especialidade}>"
 
-    @staticmethod
-    def _parse_datetime(value):
-        """Parse a datetime from several common formats.
-
-        Accepts datetime objects or strings in formats like:
-        - DD-MM-YYYY HH:MM
-        - YYYY-MM-DD HH:MM[:SS]
-        - ISO 8601
-        """
-        if value is None:
-            return None
-        if isinstance(value, datetime):
-            return value
-        if isinstance(value, str):
-            s = value.strip()
-            # try common formats
-            fmts = [
-                "%d-%m-%Y %H:%M",
-                "%d-%m-%Y %H:%M:%S",
-                "%Y-%m-%d %H:%M",
-                "%Y-%m-%d %H:%M:%S",
-                "%Y-%m-%dT%H:%M:%S",
-                "%Y-%m-%dT%H:%M:%S.%f",
-                "%Y-%m-%d",
-            ]
-            for fmt in fmts:
-                try:
-                    dt = datetime.strptime(s, fmt)
-                    # if only date provided, return date at midnight
-                    return dt
-                except Exception:
-                    continue
-            # As a last resort, try fromisoformat
-            try:
-                return datetime.fromisoformat(s)
-            except Exception:
-                pass
-        raise ValueError(f"Invalid datetime format for data_hora: {value}")
+  
 
     @classmethod
     def from_dict(cls, data: dict):
