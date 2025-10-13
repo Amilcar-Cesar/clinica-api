@@ -16,51 +16,125 @@
 
     <div class="row mb-4">
         <div class="col-md-4">
-            <div class="card summary-card">
-                <a class="nav-link" href="{{ url_for('pacientes_route.list_pacientes') }}">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title">Pacientes</h5>
-                        <p class="card-text text-muted">Gerenciar cadastro de pacientes</p>
+            <a href="{{ url_for('home_route.home', view='pacientes') }}" class="text-decoration-none">
+                <div class="card summary-card {% if view == 'pacientes' %}active{% endif %}">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Pacientes</h5>
+                            <p class="card-text text-muted">Gerenciar cadastro de pacientes</p>
+                        </div>
+                        <i class="bi bi-people-fill icon-lg"></i>
                     </div>
-                    <i class="bi bi-people-fill icon-lg"></i>
                 </div>
-                </a>
-            </div>
+            </a>
         </div>
         <div class="col-md-4">
-            <div class="card summary-card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title">Especialidades</h5>
-                        <p class="card-text text-muted">Gerenciar especialidades médicas</p>
+            <a href="{{ url_for('home_route.home', view='especialidades') }}" class="text-decoration-none">
+                <div class="card summary-card {% if view == 'especialidades' %}active{% endif %}">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Especialidades</h5>
+                            <p class="card-text text-muted">Gerenciar especialidades médicas</p>
+                        </div>
+                        <i class="bi bi-heart-pulse icon-lg"></i>
                     </div>
-                    <i class="bi bi-heart-pulse icon-lg"></i>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-4">
-            <div class="card summary-card active">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title">Atendimentos</h5>
-                        <p class="card-text text-muted">Gerar e visualizar atendimentos</p>
+            <a href="{{ url_for('home_route.home', view='atendimentos') }}" class="text-decoration-none">
+                <div class="card summary-card {% if view == 'atendimentos' %}active{% endif %}">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title">Atendimentos</h5>
+                            <p class="card-text text-muted">Gerar e visualizar atendimentos</p>
+                        </div>
+                        <i class="bi bi-calendar2-check icon-lg"></i>
                     </div>
-                    <i class="bi bi-calendar2-check icon-lg"></i>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
+    {% if view == 'pacientes' %}
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title">Lista de Pacientes</h3>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoPacienteModal">
+                    <i class="bi bi-plus-lg"></i> Novo Paciente
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Data Nascimento</th>
+                            <th scope="col">CPF</th>
+                            <th scope="col" class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for paciente in pacientes %}
+                        <tr>
+                            <td>{{ paciente.nome }}</td>
+                            <td>{{ paciente.data_nascimento.strftime('%d-%m-%Y') if paciente.data_nascimento else 'N/A' }}</td>
+                            <td>{{ paciente.cpf or 'N/A' }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-outline-primary btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editPacienteModal" data-id="{{ paciente.id }}" data-nome="{{ paciente.nome }}" data-nascimento="{{ paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else '' }}" data-cpf="{{ paciente.cpf or '' }}" data-sus="{{ paciente.cartao_sus or '' }}" data-endereco="{{ paciente.endereco or '' }}"><i class="bi bi-pencil-fill"></i></button>
+                                <form action="{{ url_for('pacientes_route.delete_paciente', paciente_id=paciente.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza?');"><button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash-fill"></i></button></form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if view == 'especialidades' %}
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title">Lista de Especialidades</h3>
+                <a href="#" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nova Especialidade</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome da Especialidade</th>
+                            <th scope="col" class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for esp in especialidades %}
+                        <tr>
+                            <td>{{ esp.id }}</td>
+                            <td>{{ esp.nome_especialidade }}</td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil-fill"></i></button>
+                                <button class="btn btn-danger btn-sm"><i class="bi bi-trash-fill"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if view == 'atendimentos' %}
     <div class="card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="card-title">Lista de Atendimentos</h3>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoAtendimentoModal">
-                    <i class="bi bi-plus-lg"></i> Novo Atendimento
-                </button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoAtendimentoModal"><i class="bi bi-plus-lg"></i> Novo Atendimento</button>
             </div>
-
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -81,58 +155,13 @@
                             <td>{{ atendimento.criado_por }}</td>
                             <td>{{ atendimento.criado_em.strftime('%d-%m-%Y %H:%M') }}</td>
                         </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center">Nenhum atendimento encontrado.</td>
-                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
-<div class="modal fade" id="novoAtendimentoModal" tabindex="-1" aria-labelledby="novoAtendimentoModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="novoAtendimentoModalLabel">Novo Atendimento</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form action="{{ url_for('atendimentos_route.create_atendimento') }}" method="POST">
-        <div class="modal-body">
-          <p class="text-muted">Preencha os dados para gerar um novo atendimento</p>
 
-          <div class="mb-3">
-            <label for="pacienteSearch" class="form-label">Paciente</label>
-            <input type="text" class="form-control" id="pacienteSearch" placeholder="Digite o nome ou CPF do paciente..." autocomplete="off">
-            <div id="searchResults" class="list-group mt-1"></div>
-            <input type="hidden" name="paciente_id" id="pacienteId">
-          </div>
-
-          <div class="mb-3">
-            <label for="especialidadeId" class="form-label">Especialidade</label>
-            <select class="form-select" name="especialidade_id" id="especialidadeId" required>
-              <option value="" selected disabled>Selecione uma especialidade</option>
-              {% for esp in especialidades %}
-                <option value="{{ esp.id }}">{{ esp.nome_especialidade }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        <div class="mb-3">
-            <label for="dataHora" class="form-label">Data e Hora do Atendimento</label>
-            <input type="datetime-local" class="form-control" name="data_hora" id="dataHora" required>
-        </div>
-          
-
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Gerar Atendimento</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 {% endblock %}
-
