@@ -8,10 +8,15 @@ from src.main.services.auth import is_admin
 pacientes_route_bp = Blueprint("pacientes_route", __name__)
 
 
-def paciente_to_dict(p: Pacientes):
-    return p.to_dict()
+# ROTA PARA LISTAR PACIENTES (GET)
+@pacientes_route_bp.route('/', methods=['GET'])
+@login_required
+def list_pacientes():
+    pacientes = Pacientes.query.order_by(Pacientes.nome).all()
+    return render_template('pacientes.html', pacientes=pacientes)
 
 
+# ROTA PARA CRIAR PACIENTE (POST)
 @pacientes_route_bp.route('/', methods=['POST'])
 @login_required
 def create_paciente():
@@ -21,67 +26,28 @@ def create_paciente():
         db.session.commit()
     except Exception as e:
         print(f"Erro ao criar paciente: {e}")
-
-    return redirect(url_for('pacientes_route.list_pacientes'))
-
-
-@pacientes_route_bp.route('/', methods=['GET'])
-@login_required
-def list_pacientes():
-    pacientes = Pacientes.query.order_by(Pacientes.nome).all()
-    return render_template('pacientes.html', pacientes=pacientes)
+    # Redireciona para a página de onde o usuário veio (ou para a lista como padrão)
+    return redirect(request.referrer or url_for('pacientes_route.list_pacientes'))
 
 
-@pacientes_route_bp.route('/<int:paciente_id>', methods=['GET'])
-@login_required
-def get_paciente(paciente_id):
-    paciente = db.session.get(Pacientes, paciente_id)
-    if paciente is None:
-        abort(404)
-    return jsonify(paciente_to_dict(paciente))
-
-
-@pacientes_route_bp.route('/<int:paciente_id>', methods=['POST'])
+# ROTA PARA ATUALIZAR PACIENTE (POST)
+@pacientes_route_bp.route('/<int:paciente_id>/update', methods=['POST'])
 @login_required
 def update_paciente(paciente_id):
     paciente = db.session.get(Pacientes, paciente_id)
-    if paciente is None:
+    if not paciente:
         abort(404)
-   
     try:
         paciente.update_from_dict(request.form.to_dict())
         db.session.commit()
-    except ValueError as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'database error', 'detail': str(e)}), 500
-    return redirect(url_for('pacientes_route.list_pacientes'))
+        print(f"Erro ao atualizar paciente: {e}")
+    return redirect(request.referrer or url_for('pacientes_route.list_pacientes'))
 
 
-@pacientes_route_bp.route('/search', methods=['GET'])
-@login_required
-def search_pacientes():
-    # Pega o termo de busca da query string (ex: /search?q=joao)
-    query = request.args.get('q', '', type=str)
-    
-    if not query:
-        return jsonify([]) # Retorna lista vazia se não houver busca
-
-    # Filtra pacientes cujo nome OU CPF contenham o termo da busca (case-insensitive)
-    pacientes = Pacientes.query.filter(
-        or_(
-            Pacientes.nome.ilike(f'%{query}%'),
-            Pacientes.cpf.ilike(f'%{query}%')
-        )
-    ).limit(10).all() # Limita a 10 resultados para performance
-
-    # Retorna a lista de pacientes encontrados em formato JSON
-    return jsonify([paciente.to_dict() for paciente in pacientes])
-
-
-@pacientes_route_bp.route('/<int:paciente_id>', methods=['POST'])
+# ROTA PARA DELETAR PACIENTE (POST)
+@pacientes_route_bp.route('/<int:paciente_id>/delete', methods=['POST'])
 @login_required
 def delete_paciente(paciente_id):
     if not is_admin():
@@ -90,4 +56,17 @@ def delete_paciente(paciente_id):
     if paciente:
         db.session.delete(paciente)
         db.session.commit()
-    return redirect(url_for('pacientes_route.list_pacientes'))
+    return redirect(request.referrer or url_for('pacientes_route.list_pacientes'))
+
+
+# ROTA DE BUSCA (JSON) - SEM ALTERAÇÕES
+@pacientes_route_bp.route('/search', methods=['GET'])
+@login_required
+def search_pacientes():
+    query = request.args.get('q', '', type=str)
+    if not query:
+        return jsonify([])
+    pacientes = Pacientes.query.filter(
+        or_(Pacientes.nome.ilike(f'%{query}%'), Pacientes.cpf.ilike(f'%{query}%'))
+    ).limit(10).all()
+    return jsonify([p.to_dict() for p in pacientes])
